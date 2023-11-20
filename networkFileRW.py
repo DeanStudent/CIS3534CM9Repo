@@ -8,14 +8,18 @@
 ##---->>>> Use a try/except clause to import the JSON module
 try:
     import json
-except: 
-    print("json failed to import")
-
-
+    #https://docs.python.org/3/library/json.html
+except:
+    print("Unable to load json module")
 
 ##---->>>> Create file constants for the file names; file constants can be reused
 ##         There are 2 files to read this program: equip_r.txt and equip_s.txt
 ##         There are 2 files to write in this program: updated.txt and errors.txt
+equipR = "equip_r.txt"
+equipS = "equip_s.txt"
+updates = "updated.txt"
+errors = "invalid.txt"
+
 
 
 #prompt constants
@@ -59,31 +63,26 @@ def getValidIP(invalidIPCount, invalidIPAddresses):
                 #don't need to return invalidIPAddresses list - it's an object
         
 def main():
+    try:
+        with open(equipR, 'r') as file:
+            ##---->>>> read the routers and addresses into the
+            #          router dictionary
+            routers = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        routers = {"No Routers Found": "0.0.0.0"}
 
-    ##---->>>> open files here
-    open(equip_r.txt, mode = 'r', encoding = 'UTF-8')
-    open(equip_s.txt, mode = 'r', encoding = 'UTF-8')
-    open(updated.txt, mode = 'w', encoding = 'UTF-8')
-    open(errors.txt, mode = 'w', encoding = 'UTF-8')
-
-
-
-    
-    #dictionaries
-    ##---->>>> read the routers and addresses into the router dictionary
-
-    routers = {equip_r.txt}
-
-
-    ##---->>>> read the switches and addresses into the switches dictionary
-
-    switches = {equip_s.txt}
-
+    try:
+        with open(equipS, 'r') as file:
+            ##---->>>> read the switches and addresses into the
+            #          switches dictionary
+            switches = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        switches = {"No Switches Found": "0.0.0.0"}
 
     #the updated dictionary holds the device name and new ip address
-    updated = {updated.txt}
-
-    #list of bad addresses entered by the user
+    updated = {}
+    
+    #list of bad addresses entered by the user. Maintains a file over time
     invalidIPAddresses = []
 
     #accumulator variables
@@ -137,7 +136,8 @@ def main():
 
     ##---->>>> write the updated equipment dictionary to a file
 
-    
+    with open(updates, 'w') as file:
+        json.dump(updated, file)
     print("Updated equipment written to file 'updated.txt'")
     print()
     print("\nNumber of invalid addresses attempted:", invalidIPCount)
@@ -145,6 +145,8 @@ def main():
     ##---->>>> write the list of invalid addresses to a file
     
 
+    with open(errors, 'w') as file:
+        json.dump(invalidIPAddresses, file)
     print("List of invalid addresses written to file 'errors.txt'")
 
 #top-level scope check
